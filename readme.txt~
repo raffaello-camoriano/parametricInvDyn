@@ -25,7 +25,7 @@ Step 6 : Run the code you want according to your choise for estimating parameter
 
 	#### ./iCubParis02_simple_analysis --dataset ../Data_Sets/part1-left.csv --results results.csv #### 
 
-Note : These tests were made on iCub left hand. some tests were made when new package were included for getting regularization parameter.  
+Note : These tests were made on iCub left hand. some tests were made when new package were included for getting regularization parameter. There are certain options to change approach for getting $lambda$. Please go through the code for more details.
 
 
 

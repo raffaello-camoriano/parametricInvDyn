@@ -33,7 +33,5 @@ This package is simple extension of exisiting work showing the influence of ragu
 
 Detail explaination of parametric modeling and theory behind this can be found from my thesis which is included in the package. 
 
-How to install 
-
 Any problems with code or questions can be asked through email prabhukumar.chalikonda@gmail.com
 
