@@ -1,3 +1,5 @@
+The objective is to estimate the ineetial parameters like mass, center of mass & inertia matrx using icub left hand dataset. 
+
 Package includes c++ code for parametric modeling using GURLS package. However first, Install GURLS package with necessary dependencies from https://github.com/LCSL/GURLS. More detail information can be found on GURLS manual. In addition to GURLS you have to install other packages like ICUB, Yarp, kdl_codyco, orocos_kdl, iDynTree. 
 
 iCub & Yarp installation can be found on http://wiki.icub.org/wiki/Linux:Installation_from_sources
