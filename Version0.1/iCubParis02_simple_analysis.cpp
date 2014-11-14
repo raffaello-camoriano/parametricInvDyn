@@ -64,7 +64,7 @@ const double ZERO_TOL = 1e-5;
 bool convertJointsFromDatasetToModel(const KDL::JntArray & q_dataset, KDL::JntArray & q_model, bool verbose = false)
 {
     if( q_dataset.rows() != DATASET_DOFS ) {
-        if( verbose ) std::cout << "Q from dataset has size " << q_dataset.rows() << std::endl;
+        if( verbose ) cout << "Q from dataset has size " << q_dataset.rows() << std::endl;
     }
 
     assert(q_dataset.rows() == DATASET_DOFS);
@@ -96,10 +96,10 @@ bool convertJointsFromDatasetToModel(const KDL::JntArray & q_dataset, KDL::JntAr
     }
     
     return true;
-//     std::cout <<"q_model data used for gurls for computing regularization parameter"<<std::endl;
-//     std::cout << "=================================================================" << std::endl;
-//     std::cout <<q_model <<std::endl;
-//     std::cout << "================================================================="<<std::endl;
+//     cout <<"q_model data used for gurls for computing regularization parameter"<<std::endl;
+//     cout << "=================================================================" << std::endl;
+//     cout <<q_model <<std::endl;
+//     cout << "================================================================="<<std::endl;
 }
 
 bool toYarp(const KDL::Wrench & ft, yarp::sig::Vector & ft_yrp)
@@ -147,20 +147,38 @@ int main(int argc, char ** argv)
    
     if( !opt.check("dataset") ) {
         std::cout << "iCubParis02_data_analysis_simple: " << std::endl;
-        std::cout << "usage: ./iCubParis02_data_analysis --dataset dataset.csv --results results.csv --xtrain xtr.txt --ytrain ytr.txt " << std::endl;
-        std::cout << "additional options: --n_samples n the number of random regressors to generate for the numerical identifable subspace computation" << std::endl;
-        std::cout << "additional options: --cut_freq the cut frequency to use for filtering torques and ft measures (in Hz, default 3 Hz)" << std::endl;
-        std::cout << "additional options: --sampleTime the sample time of the data (in s, default: 0.01 s)" << std::endl;
-        std::cout << "additional options: --lambda regularization parameter" << std::endl;
-        std::cout << "additional options: --skip number of initial samples to skip" << std::endl;
-        std::cout << "additional options: --verbose print debug information" << std::endl;
-        std::cout << "additional options: --parameters param.csv output a file of trajectoreis of the estimated parameters" << std::endl;
+        cout << "usage: ./iCubParis02_data_analysis --dataset dataset.csv --results results.csv --xtrain xtr.txt --ytrain ytr.txt " << std::endl;
+        cout << "additional options: --n_samples n the number of random regressors to generate for the numerical identifable subspace computation" << std::endl;
+        cout << "additional options: --cut_freq the cut frequency to use for filtering torques and ft measures (in Hz, default 3 Hz)" << std::endl;
+        cout << "additional options: --sampleTime the sample time of the data (in s, default: 0.01 s)" << std::endl;
+        cout << "additional options: --lambda regularization parameter" << std::endl;
+        cout << "additional options: --skip number of initial samples to skip" << std::endl;
+        cout << "additional options: --verbose print debug information" << std::endl;
+        cout << "additional options: --parameters param.csv output a file of trajectoreis of the estimated parameters" << std::endl;
         return 0;
     }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //// Parameter parsing
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // get file names from input
+    string xtr_file;
+    if(!opt.check("xtrain")) {
+        cout << "Training samples file not specified. Use --xtrain [FILE_PATH]" << endl;
+        return -1;
+    } else {
+        xtr_file = opt.find("xtrain").asString();
+    }
+
+    string ytr_file;
+    if(!opt.check("ytrain")) {
+        cout << "Training labels file not specified. Use --ytrain [FILE_PATH]" << endl;
+        return -1;
+    } else {
+        ytr_file = opt.find("ytrain").asString();
+    }
+    
     int n_samples;
     if(!opt.check("n_samples")) {
         n_samples = 1000;
@@ -190,20 +208,28 @@ int main(int argc, char ** argv)
         gMat2D<T> Xtr, ytr;	
 	
 	// for silvio dataset
-//         Xtr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/inputs.csv");
-// 	ytr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/outputs.csv");
-// 	
+//      Xtr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/inputs.csv");
+//      ytr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/outputs.csv");
+	
 	// for icub dataset
-	Xtr.readCSV("../Data_Sets/Xtr_2psmall.txt");
-	std::cout << Xtr.rows() <<std::endl;
-	ytr.readCSV("../Data_Sets/ytr_2psmall.txt");
+	//Xtr.readCSV("../Data_Sets/Xtr_2psmall.txt");
+	//cout << Xtr.rows() <<std::endl;
+	//ytr.readCSV("../Data_Sets/ytr_2psmall.txt");
 
-
+        // for given dataset
+        Xtr.readCSV(xtr_file);
+        cout << Xtr.rows() << endl;
+        ytr.readCSV(ytr_file);
+        
 	OptTaskSequence *seq = new OptTaskSequence();
 	*seq << "split:ho"<<"paramsel:hoprimal"; // paramsel can be used are fixlambda (always 1), loocvprimal, hoprimal
-	std::cout << "========================================" << std::endl;
-	std::cout << "Specified Task Sequence :" << std::endl;
-	std::cout << *seq << std::endl <<std::endl; 
+        
+        
+	cout << "========================================" << std::endl;
+	cout << "Specified Task Sequence :" << std::endl;
+	cout << *seq << std::endl <<std::endl; 
+        
+        
 	GurlsOptionsList * process = new GurlsOptionsList("processes", false);
 	OptProcess* process1 = new OptProcess();
 	*process1 << GURLS::computeNsave << GURLS::computeNsave;
@@ -211,82 +237,112 @@ int main(int argc, char ** argv)
 	GurlsOptionsList* apt = new GurlsOptionsList("iCubParis02_simple_analysis", true);
 	apt->addOpt("seq", seq);
 	apt->addOpt("processes", process);
+        OptString* hofun = new OptString("rmse");
+        apt->removeOpt("hoperf");
+        apt->addOpt("hoperf", hofun);
+
 	 GURLS G;
 
         string jobId0("one");
 
         // run gurls for getting regularization parameter (lambda)
-	
         G.run(Xtr, ytr, *apt, jobId0);
+        
 	try{
-           gMat2D<T> &lambdas = apt->getOptValue<OptMatrix<gMat2D<T> > >("paramsel.lambdas");
-           std::cout << "lambda values: \n" << lambdas << std::endl << std::endl;
-	   if (lambdas.getSize() > 1)
-	   {
-	   gVec<T> d = lambdas.asvector();
-	   double a[6] = {d[0],d[1],d[2],d[3],d[4],d[5]};
-	   Median fun;
-	   lambda_semi = fun(a, 6); 
-	   if(lambda_semi != 1)
-	   {
-	   lambda = lambda_semi;
-	   //lambda = 0.75;
-	   std::cout <<"final lambda value: " << lambda <<endl;
-	   }
-	   }
-	   else 
-	   { 
-	     lambda = 1;
-	     std::cout <<"final lambda value: " <<lambda<<endl;
-	   }
+            gMat2D<T> &lambdas = apt->getOptValue<OptMatrix<gMat2D<T> > >("paramsel.lambdas");
+            
+            cout << "lambda values: \n" << lambdas << std::endl << std::endl;
+            
+            if (lambdas.getSize() > 1)
+            {
+                gVec<T> d = lambdas.asvector();
+                double a[6] = {d[0],d[1],d[2],d[3],d[4],d[5]};
+                
+                // Compute median lambda
+                Median fun;
+                lambda_semi = fun(a, 6); 
+                
+                if(lambda_semi != 1)
+                {
+                    lambda = lambda_semi;
+                    cout <<"======================" <<endl;
+                    cout <<"Selected lambda: " << lambda <<endl;
+                    cout <<"======================" <<endl;
+                }
+            }
+            
+//             else 
+//             { 
+//                 lambda = 1;
+//                 cout <<"final lambda value: " <<lambda<<endl;
+//             }
        }
+       
        catch(std::exception &){
-           std::cout << "Not computed" << std::endl << std::endl;
+           cout << "Lambda not computed by GURLS" << std::endl << std::endl;
        }
+       
        //Debugging mode to see whether lambda value is correct or not....! optional
-       std::cout << " ================= Printing All ================" <<std::endl << std::endl;
+       cout << " ================= Printing All ================" <<std::endl << std::endl;
        apt->printAll();
-       std::cout << " ================= Printed All ================" <<std::endl << std::endl;
+       cout << " ================= Printed All ================" <<std::endl << std::endl;
     }
+    
     else 
     {
+        // Get lambda from parsed options
         lambda = opt.find("lambda").asDouble();
     }
     
     int skip;
-    if(!opt.check("skip")) {
+    if(!opt.check("skip")) 
+    {
         skip = 1;
-    } else {
-        skip = opt.find("skip").asDouble();
+    } 
+    else 
+    {
+//         skip = opt.find("skip").asDouble();
+        skip = opt.find("skip").asInt();
     }
     
     bool verbose;
-    if(!opt.check("verbose")) {
+    if(!opt.check("verbose")) 
+    {
         verbose = false;
-    } else {
+    } 
+    else 
+    {
         verbose = true;
     }
-    std::cout << "lambda used finally ....! : " << lambda <<std::endl;
+    
     //////////////////////////////////////////////////////////////////////////////////
     /// Opening the dataset in csv format. 
     /// The format of the dataset is described in https://github.com/traversaro/dir-dataset-format/blob/master/dynamic_dataset_format.md 
     //////////////////////////////////////////////////////////////////////////////////
+
+    
     std::string dataset_file_name(opt.find("dataset").asString());
     //Loading dataset
     DynamicDatasetFile test_dataset;
     test_dataset.loadFromFile(dataset_file_name);
     
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //// Open a result file to dump output
     ///////////////////////////////////////////////////////////////////////////////////
+    
+    
     std::string results_file_name(opt.find("results").asString());
     //Open result file
     std::ofstream results_file;
     results_file.open(results_file_name.c_str());
     
+    
     //////////////////////////////////////////////////////////////
-    ////////// if parameter are specified in separate file to load
+    ////////// Get file name for estimated parameters dumping
     //////////////////////////////////////////////////////////
+    
+    
     bool output_param = false;
     std::string params_file_name;
     
@@ -295,16 +351,17 @@ int main(int argc, char ** argv)
         output_param = true;
     }
     
-
     std::ofstream param_file;
     
     if( output_param ) {
         param_file.open(params_file_name.c_str());
     }
     
+    
     /////////////////////////////////////////////////////////////////////////////////////
     /////// We get the model of the robot 
     //////////////////////////////////////////////////////////////////////////////////
+    
     iCub::iDynTree::iCubTree_version_tag tag;
     //iCubParis02 is a v2 robot
     tag.head_version = 2;
@@ -312,16 +369,20 @@ int main(int argc, char ** argv)
     
     iCub::iDynTree::iCubTree icub_tree_model(tag);
     
+    
     //////////////////////////////////////////////////////////////////
     /////// We define the subtree we are interested into
     /////////////////////////////////////////////////////////////
+    
     std::vector<std::string> l_arm_subtree, r_arm_subtree;
     l_arm_subtree.push_back("l_arm");
     r_arm_subtree.push_back("r_arm");
     
+    
     ////////////////////////////////////////////////////////////////
-    ///// All variable setted to right part 
+    ///// All variables set to right part 
     ///////////////////////////////////////////////////////////////
+    
     //Can be l_elbow or r_elbow
     std::string elbow_joint_name = "l_elbow";
     
@@ -337,7 +398,7 @@ int main(int argc, char ** argv)
     //Can be r_arm_subtreee or l_arm_subtree
     std::vector<std::string> arm_subtree = l_arm_subtree;
     
-    //In the regressor generator, the ft is identified by a index
+    //In the regressor generator, the ft is identified by an index
     //We add only a FT sensor for regressor, so it should be 0
     const int ft_regressor_generator_sensor_index = 0;
     
@@ -352,17 +413,21 @@ int main(int argc, char ** argv)
     
     const double shoulder_pitch_torque_gain = LEFT_SHOULDER_PITCH_GAIN;
     
+    
     ///////////////////////////////////////////////////////////////
     /////// Defining the names of the ft sensors
     ////////////////////////////////////////////////////////////////
+    
     //Can be l_arm_ft_sensor or r_arm_ft_sensor 
     std::string ft_sensor_name = "l_arm_ft_sensor";
     std::vector<std::string> ft_names;
     ft_names.push_back(ft_sensor_name);
     
+    
     ///////////////////////////////////////////////////////////////
     ///// Some links that are always considered to have 0 mass and not considered in parametric estimation
     ///////////////////////////////////////////////////////////
+    
     std::vector<std::string> fake_names;
     fake_names.push_back("torso");
     fake_names.push_back("imu_frame");
@@ -373,39 +438,45 @@ int main(int argc, char ** argv)
     fake_names.push_back("l_wrist_1");
     fake_names.push_back("r_wrist_1");
     
+    
     //////////////////////////////////////////////
     ////// Root link of the overall robot
     ///////////////////////////////////////////////
+    
     std::string root_link_name = "root_link";
    
+    
     //////////////////////////////////////////////////
-    /// Some data structures used to generated 
+    /// Some data structures used to generate
     /////////////////////////////////////////////////
+    
     /**
-         * Get a list of wrenches that are the internal dynamics (base link M(q)ddq + C(q,dq)dq + n(q))
-         * of each subtree, expressed in the world reference frame, with respect to the world origin
-         */
+    * Get a list of wrenches that are the internal dynamics (base link M(q)ddq + C(q,dq)dq + n(q))
+    * of each subtree, expressed in the world reference frame, with respect to the world origin
+    */
+    
     KDL::Tree icub_kdl_tree = icub_tree_model.getKDLTree();
-    //std::cout << "icub_kdl_tree information :" << icub_kdl_tree.getNrOfSegments() <<std::endl;
+    cout << "icub_kdl_tree information :" << icub_kdl_tree.getNrOfSegments() <<std::endl;
     
     KDL::CoDyCo::UndirectedTree icub_kdl_undirected_tree = icub_tree_model.getKDLUndirectedTree();
-    //std::cout << "icub_kdl_undirected_tree information :" << icub_kdl_undirected_tree.getSerialization() <<std::endl;
-    KDL::CoDyCo::TreeSerialization icub_serialization =icub_tree_model.getKDLUndirectedTree().getSerialization();
-    //std::cout << "icub_serialization information :" << icub_serialization.getNrOfLinks() << std::endl;
+//     cout << "icub_kdl_undirected_tree information :" << icub_tree_model.getKDLUndirectedTree().getSerialization() <<std::endl;
+    
+    KDL::CoDyCo::TreeSerialization icub_serialization = icub_kdl_undirected_tree.getSerialization();
+    cout << "icub_serialization information :" << icub_serialization.getNrOfLinks() << std::endl;
+    
     KDL::CoDyCo::FTSensorList icub_ft_list(icub_kdl_undirected_tree,ft_names);
-   // std::cout <<"icub_ft_list information :" << icub_ft_list.getNrOfFTSensors() << std::endl;
+    cout <<"icub_ft_list information :" << icub_ft_list.getNrOfFTSensors() << std::endl;
  
     
     bool consider_ft_offset = true;
     bool verbose_output = true;
+    
     /**
- * The dynamics regressor generator is a class for calculating arbitrary regressor
- * related to robot dynamics, for identification of dynamics parameters, such 
- * as inertial parameters (masses, centers of mass, inertia tensor elements) or 
- * other related parameters (for example force/torque sensor offset).
- * 
- * 
- */
+    * The dynamics regressor generator is a class for calculating arbitrary regressor
+    * related to robot dynamics, for identification of dynamics parameters, such 
+    * as inertial parameters (masses, centers of mass, inertia tensor elements) or 
+    * other related parameters (for example force/torque sensor offset).
+    */
     
     DynamicRegressorGenerator ft_regressor_generator(icub_kdl_tree,
                                                      root_link_name,
@@ -414,15 +485,17 @@ int main(int argc, char ** argv)
                                                      fake_names,
                                                      icub_serialization,
                                                      verbose_output);
-    // for changing the base link to right arm
+    
+    //For changing the base link to left or right arm
     ft_regressor_generator.changeDynamicBase(subtree_dynamic_base);
 
 
-    //Adding one regressors to the generator:
+    //Adding one regressor to the generator:
     //    (1) 6 for ft sensors (with offset)
     int ret = ft_regressor_generator.addSubtreeRegressorRows(arm_subtree);
     assert(ret == 0);
         
+    
     //Preprocessing of input
     iCub::ctrl::FirstOrderLowPassFilter * tau_filt;    
     iCub::ctrl::FirstOrderLowPassFilter * tau_filt_shoulder_pitch;
@@ -434,37 +507,44 @@ int main(int argc, char ** argv)
     //Defining some variables used in the estimation loop
     KDL::JntArray q, dq, ddq;
     yarp::sig::Vector q_yarp, dq_yarp, ddq_yarp;
+    
     q.resize(ft_regressor_generator.getNrOfDOFs());
     SetToZero(q);
+    
     q_yarp.resize(q.rows(),0.0);
     dq_yarp = q_yarp;
     ddq_yarp = q_yarp;
-    std::cout << ddq_yarp.size() <<std::endl;
+    
+    cout << ddq_yarp.size() << std::endl;
+    
     dq = q;
     ddq = q;
-    std::cout << "rows :" << ddq.rows()<<" cols:" <<ddq.columns() <<std::endl;
+    
+    cout << "rows :" << ddq.rows()<<" cols:" << ddq.columns() <<std::endl;
     KDL::Wrench ft_sample;
-    std::cout << ft_sample <<std::endl;
+    cout << ft_sample << std::endl;
     yarp::sig::Vector ft_sample_raw(6,0.0), ft_sample_filtered(6,0.0);
     
     //Defining gravity vector
     const double g = 9.806;
-    KDL::Twist gravity(KDL::Vector(0.0,0.0,g),KDL::Vector(0.0,0.0,0.0));
+    KDL::Twist gravity(KDL::Vector(0.0,0.0,g) , KDL::Vector(0.0,0.0,0.0));
     
-    KDL::Twist zero_gravity = KDL::Twist::Zero();
-    KDL::JntArray zero_q = q;
-    SetToZero(zero_q);
-    std::cout << ft_regressor_generator.getNrOfParameters()<<std::endl;
-    std::cout << ft_regressor_generator.getNrOfOutputs()<<std::endl;
+//     KDL::Twist zero_gravity = KDL::Twist::Zero();
+//     KDL::JntArray zero_q = q;
+//     SetToZero(zero_q);
+    
+    cout << "ft_regressor_generator.getNrOfParameters() = " << ft_regressor_generator.getNrOfParameters() << std::endl;
+    cout << "ft_regressor_generator.getNrOfOutputs() = " << ft_regressor_generator.getNrOfOutputs() << std::endl;
+    
     //Defining the matrix that i will used for getting the regressor
     Eigen::MatrixXd ft_regressor(ft_regressor_generator.getNrOfOutputs(),ft_regressor_generator.getNrOfParameters());
-    std::cout <<"rows of ft_regressor :" <<ft_regressor.rows()<<"cols of ft_regressor :" << ft_regressor.cols()<<std::endl;
+    cout <<"rows of ft_regressor :" <<ft_regressor.rows()<<"cols of ft_regressor :" << ft_regressor.cols()<<std::endl;
     Eigen::VectorXd ft_kt(ft_regressor_generator.getNrOfOutputs());
-    std::cout <<"rows of ft_kt :" <<ft_kt.rows()<<"cols of ft_regressor :" << ft_kt.cols()<<std::endl;
+    cout <<"rows of ft_kt :" <<ft_kt.rows()<<"cols of ft_regressor :" << ft_kt.cols()<<std::endl;
     Eigen::MatrixXd ft_regressor_wrong_frame(ft_regressor_generator.getNrOfOutputs(),ft_regressor_generator.getNrOfParameters());
-    std::cout <<"rows of ft_regressor_wrong_frame :" <<ft_regressor_wrong_frame.rows()<<"cols of ft_regressor_wrong_frame :" << ft_regressor_wrong_frame.cols()<<std::endl;
+    cout <<"rows of ft_regressor_wrong_frame :" <<ft_regressor_wrong_frame.rows()<<"cols of ft_regressor_wrong_frame :" << ft_regressor_wrong_frame.cols()<<std::endl;
     Eigen::VectorXd ft_kt_wrong_frame(ft_regressor_generator.getNrOfOutputs());
-    std::cout <<"rows of ft_kt_wrong_frame :" <<ft_kt_wrong_frame.rows()<<"cols of ft_regressor :" << ft_kt_wrong_frame.cols()<<std::endl;
+    cout <<"rows of ft_kt_wrong_frame :" <<ft_kt_wrong_frame.rows()<<"cols of ft_regressor :" << ft_kt_wrong_frame.cols()<<std::endl;
     
     
   
@@ -472,10 +552,10 @@ int main(int argc, char ** argv)
     
     //Computing the identifiable subspace basis matrix
     Eigen::MatrixXd base_parameters_subspace; 
-    std::cout<<"rows of base_parameters_subspace :" <<base_parameters_subspace.rows() <<"cols of base_parameters_subspace :" <<base_parameters_subspace.cols() <<std::endl;
-    std::cout <<n_samples<<std::endl;
+    cout<<"rows of base_parameters_subspace :" <<base_parameters_subspace.rows() <<"cols of base_parameters_subspace :" <<base_parameters_subspace.cols() <<std::endl;
+    cout <<n_samples<<std::endl;
     ret_value = ft_regressor_generator.computeNumericalIdentifiableSubspace(base_parameters_subspace,false,n_samples);
-    std::cout << ret_value << std::endl;
+    cout << ret_value << std::endl;
     assert( ret_value == 0 );
     
     //Computing the identifiable subspace basis matrix, considering velocity and acceleration to zero
@@ -485,8 +565,10 @@ int main(int argc, char ** argv)
     
     //int nrOfStatic_base_parameters = static_base_parameters_subspace.cols();
     int nrOfBase_parameters = base_parameters_subspace.cols();
-    std::cout << nrOfBase_parameters<<std::endl;
-   //Defining the hyperparameter of output standard deviation
+    
+    cout << "nrOfBase_parameters = " << nrOfBase_parameters << std::endl;
+    
+    //Defining the hyperparameter of output standard deviation
     Eigen::VectorXd output_stddev(6);
     output_stddev << 0.0707119 ,  0.07460326,  0.11061799,  0.00253377,  0.00295331, 0.00281101;
    
@@ -494,23 +576,27 @@ int main(int argc, char ** argv)
     //Defining the estimator objects
     multiTaskRecursiveLinearEstimator estimator_dynamic(nrOfBase_parameters,ft_regressor_generator.getNrOfOutputs(),lambda);
     estimator_dynamic.setOutputErrorStandardDeviation(output_stddev);
+    
     //multiTaskRecursiveLinearEstimator estimator_static(static_base_parameters,ft_regressor_generator.getNrOfOutputs(),lambda);
     //estimator_static.setOutputErrorStandardDeviation(output_stddev);
     
        
     // Function to output to file estimated parameters
-    if( output_param ) {
-        //Print outputs
-        params_file_name;
-    }
+//     if( output_param ) {
+//         //Print outputs
+//         params_file_name;
+//     }
     
     // Get cad parameters from model
     Eigen::VectorXd cad_parameters(ft_regressor_generator.getNrOfParameters());
     cad_parameters.setZero();
     KDL::CoDyCo::inertialParametersVectorLoopFakeLinks(icub_kdl_undirected_tree,cad_parameters,fake_names);
     
-    //For comparing estimates between cad and estimated parameters, we have to estimate the offset for the cad
+    //For comparing estimates between cad and estimated parameters, we have to estimate
+    // the offset for the cad
+    
     //Structures for offset estimation
+    
     multiTaskSVDLinearEstimator estimator_static_offset(6,6);
     int sample_nr;
     int nmbr_of_samples_for_offset_calibration = 30;
@@ -518,20 +604,20 @@ int main(int argc, char ** argv)
     Eigen::VectorXd offset = Eigen::VectorXd(6);
     Eigen::MatrixXd regressor_offset;
     Eigen::VectorXd offset_kt;
-    std::cout <<sample_nr <<std::endl;
+    cout << sample_nr << endl;
     
-    std::cout << "size of test_dataset rows:" <<test_dataset.getNrOfSamples()<<std::endl;
+    cout << "size of test_dataset rows:" << test_dataset.getNrOfSamples() <<endl;
+    
     //Estimation loop
-    for(sample_nr=skip; sample_nr < test_dataset.getNrOfSamples(); sample_nr++ ) 
+    for(sample_nr = skip; sample_nr < test_dataset.getNrOfSamples(); ++sample_nr ) 
     {
-          if( verbose && sample_nr % 1000 == 0 )
-	  {
-	    std::cout << "Looping on sample: " << sample_nr << std::endl;
-	    
-	  }
+        if( verbose && sample_nr % 1000 == 0 )
+        {
+            cout << "Looping on sample: " << sample_nr << endl;
+        }
         
         //Joints in dataset are : Torso (3), head(6), left arm (16), right_arm (16)
-        //Depending on the dataset we use different parts, here we use only the  right arm, the torso and the head (which however should be still)
+        //Depending on the dataset we use different parts, here we use only the arm, the torso and the head (which however should be still)
         DynamicSample sample;
         bool ret = test_dataset.getSample(sample_nr,sample);
         if( !ret ) return -1;
@@ -539,38 +625,47 @@ int main(int argc, char ** argv)
         assert( sample.getJointPosition().rows() == DATASET_DOFS);
        
         convertJointsFromDatasetToModel(sample.getJointPosition(),q);
-	//std::cout << q.rows() << q.columns() <<q.data <<std::endl;               
+	//cout << q.rows() << q.columns() <<q.data <<std::endl;
+        
         //Filter values
-	std::cout << sample.getNrOfDOFs()<<std::endl;
+	//cout << "sample.getNrOfDOFs() = " << sample.getNrOfDOFs()<<std::endl;
 
-	//std::cout << sample.getJointVelocity() <<sample.getJointVelocity() << sample.getJointAcceleration() <<sample.getNrOfTorqueSensors() <<sample.getTorqueMeasure()<<std::endl;
+	//cout << sample.getJointVelocity() <<sample.getJointVelocity() << sample.getJointAcceleration() <<sample.getNrOfTorqueSensors() <<sample.getTorqueMeasure()<<std::endl;
         ft_sample = sample.getWrenchMeasure(ft_dataset_sensor_index);
         
         if( verbose && sample_nr % 1000 == 0 ) {
-            std::cout << "FT sample from dataset" << std::endl;
-            std::cout << ft_sample << std::endl;
-            std::cout << "Force norm: "<<  ft_sample.force.Norm() << std::endl;
+            cout << "FT sample from dataset" << std::endl;
+            cout << ft_sample << std::endl;
+            cout << "Force norm: "<<  ft_sample.force.Norm() << std::endl;
         }
-               std::cout<<ft_sample.force <<ft_sample.torque <<std::endl;
-	       std::cout <<" size :" << ft_sample_raw.size() <<"data :" << ft_sample_raw.data() << " length :" << ft_sample_raw.length()<< std::endl;
+        
+        //cout<< "Sample: " << ft_sample.force << "   " << ft_sample.torque << std::endl;
+        //cout <<"size: " << ft_sample_raw.size() <<" data: " << ft_sample_raw.data() << " length: " << ft_sample_raw.length()<< std::endl;
+        
         toYarp(ft_sample,ft_sample_raw);
         
         //If the sample is the first one (skip) allocate the memory, with all the parameters
-        if( sample_nr == skip ) {
+        if( sample_nr == skip ) 
+        {
             ft_filt = new iCub::ctrl::FirstOrderLowPassFilter(cut_freq,sampleTime,ft_sample_raw);
             velocity_estimator = new iCub::ctrl::AWLinEstimator(16,0.02);
-	    //std::cout << velocity_estimator->getList() << std::endl;
+            
+	    //cout << velocity_estimator->getList() << std::endl;
+            
             acceleration_estimator = new iCub::ctrl::AWQuadEstimator(50,0.02);
-	    //std::cout << acceleration_estimator->getList() << std::endl;
-        } else {
+	    
+            //cout << acceleration_estimator->getList() << std::endl;
+        } 
+        else 
+        {
             ft_sample_filtered = ft_filt->filt(ft_sample_raw);
             toKDL(ft_sample_filtered,ft_sample);
-         }
+        }
         
         if( verbose && sample_nr % 1000 == 0 ) {
-            std::cout << "FT sample filtered" << std::endl;
-            std::cout << ft_sample << std::endl;
-            std::cout << "Force norm: "<<  ft_sample.force.Norm() << std::endl;
+            cout << "FT sample filtered" << std::endl;
+            cout << ft_sample << std::endl;
+            cout << "Force norm: "<<  ft_sample.force.Norm() << std::endl;
         }
         
         //Obtain velocities and accelerations 
@@ -579,38 +674,39 @@ int main(int argc, char ** argv)
         el.time = sample.getTimestamp();
         toEigen(velocity_estimator->estimate(el),dq.data);
         toEigen(acceleration_estimator->estimate(el),ddq.data);
-        std::cout <<"velocity data :" << dq.data << std::endl;
-	std::cout << " accerlation data : " << ddq.data << std::endl;
-	std::cout <<estimator_dynamic.getParamSize() << estimator_dynamic.getParameterEstimate().data() << estimator_dynamic.getParameterEstimate() <<std::endl;
+        //cout << "velocity data : " << std::endl << dq.data << std::endl;
+	//cout << "accerlation data : " << std::endl << ddq.data << std::endl;
+	//cout << estimator_dynamic.getParamSize() << estimator_dynamic.getParameterEstimate().data() << estimator_dynamic.getParameterEstimate() <<std::endl;        
+        
         //Compute the regressors !
         ft_regressor_generator.setRobotState(q,dq,ddq,gravity);
         ft_regressor_generator.setFTSensorMeasurement(ft_regressor_generator_sensor_index,ft_sample);
         //ft_regressor_generator.setTorqueSensorMeasurement(icub_tree_model.getDOFIndex(elbow_joint_name),torque_sample);
         ft_regressor_generator.computeRegressor(ft_regressor_wrong_frame,ft_kt_wrong_frame);
 
-        //Change frame of reference to the ft_regressor and ft_kt
-        //They should be on the r_upper_arm (parent of the sensor) and we want it in the sensor reference frame
+        //Change frame of reference of ft_regressor and ft_kt
+        //They should be on the r_upper_arm or l_upper_arm (parent of the sensor)
+        //and we want it in the sensor reference frame
         KDL::Frame H_sensor_parent = icub_ft_list.ft_sensors_vector[0].getH_parent_sensor().Inverse();
         Eigen::Matrix<double,6,6> H_sens_parent = KDL::CoDyCo::WrenchTransformationMatrix(H_sensor_parent); 
-        ft_regressor = H_sens_parent*ft_regressor_wrong_frame;
-        ft_kt = H_sens_parent*ft_kt_wrong_frame;
-        
+        ft_regressor = H_sens_parent * ft_regressor_wrong_frame;
+        ft_kt = H_sens_parent * ft_kt_wrong_frame;
         
         if( verbose && sample_nr % 1000 == 0) {
-            std::cout << "Known term for forcetorque based regression (wrong frame)" << std::endl;
-            std::cout << ft_kt_wrong_frame;
-            std::cout << "Known term for forcetorque based regression" << std::endl;
-            std::cout << ft_kt << std::endl;
-            std::cout << H_sensor_parent << std::endl;
-            std::cout << H_sens_parent << std::endl;
-            std::cout << "Force norm: " << ft_kt.head(3).norm() << std::endl;
+            cout << "Known term for forcetorque based regression (wrong frame)" << std::endl;
+            cout << ft_kt_wrong_frame << std::endl;;
+            cout << "Known term for forcetorque based regression" << std::endl;
+            cout << ft_kt << std::endl;
+            cout << H_sensor_parent << std::endl;
+            cout << H_sens_parent << std::endl;
+            cout << "Force norm: " << ft_kt.head(3).norm() << std::endl;
         }
         
-        
         //Compute offset for CAD parameters
+        //WARNING: This should be a while loop
         if( nmbr_of_samples_for_offset_calibration_obtained < nmbr_of_samples_for_offset_calibration ) {
             regressor_offset = ft_regressor.rightCols<6>(); 
-            offset_kt = ft_kt - ft_regressor*cad_parameters;
+            offset_kt = ft_kt - ft_regressor * cad_parameters;
             
             estimator_static_offset.feedSample(regressor_offset,offset_kt);
             nmbr_of_samples_for_offset_calibration_obtained++;
@@ -623,51 +719,63 @@ int main(int argc, char ** argv)
             }
         }
         
-        
         //Predicting output given the current estimate
-        Eigen::Matrix<double,6,1> ft_estimated_prediction =  ft_regressor*base_parameters_subspace*estimator_dynamic.getParameterEstimate();
-        Eigen::Matrix<double,6,1> ft_cad_prediction =  ft_regressor*cad_parameters;
-        std::cout <<ft_estimated_prediction.data() << std::endl;
-	std::cout << ft_cad_prediction.data() << std::endl;
+        Eigen::Matrix<double,6,1> ft_estimated_prediction =  ft_regressor * base_parameters_subspace * estimator_dynamic.getParameterEstimate();
+        Eigen::Matrix<double,6,1> ft_cad_prediction =  ft_regressor * cad_parameters;
+        //cout << ft_estimated_prediction.data() << std::endl;
+	//cout << ft_cad_prediction.data() << std::endl;
 
         //Updating the estimate
-        estimator_dynamic.feedSampleAndUpdate(ft_regressor*base_parameters_subspace,ft_kt);
+        estimator_dynamic.feedSampleAndUpdate(ft_regressor * base_parameters_subspace,ft_kt);
            
         //estimator_static.feedSampleAndUpdate(ft_regressor*static_base_parameters_subspace,ft_kt);
                 
         //Adding the data to the results file
-        for(int i=0; i < 6; i++ ) {
-	  std::cout <<ft_estimated_prediction[i] << std::endl;
+        for(int i=0; i < 6; i++ ) 
+        {
+            //cout << ft_estimated_prediction[i] << std::endl;
             results_file << ft_estimated_prediction[i] << ",";
         }
-        for(int i=0; i < 6; i++ ) {
+        
+        for(int i=0; i < 6; i++ ) 
+        {
             results_file << ft_cad_prediction[i]; 
-	    std::cout << ft_cad_prediction[i] << std::endl;
-            if( i != 6 ) {
+	    //cout << ft_cad_prediction[i] << std::endl;
+            if( i != 6 ) 
+            {
                 results_file << ",";
-            } else {
-                results_file << std::endl;
-            }
+            } 
+//             else 
+//             {
+//                 results_file << std::endl;
+//             }
         }
+        results_file << std::endl;
       
         if( output_param ) {
             Eigen::VectorXd params1 = estimator_dynamic.getParameterEstimate();
-            for(int param_nr=0; param_nr < params1.size(); param_nr++ ) {
-                if( param_nr < params1.size() ) {
-		    std::cout << param_nr <<params1[param_nr] << std::endl;
+            for(int param_nr=0; param_nr < params1.size(); param_nr++ ) 
+            {
+                if( param_nr < params1.size() ) 
+                {
+		    //cout << param_nr <<params1[param_nr] << std::endl;
                     param_file << params1[param_nr];
                 } 
-                if( param_nr != params1.size()-1 ) {
+                if( param_nr != params1.size()-1 ) 
+                {
                     param_file << ",";
-                } else {
-                    param_file << std::endl;
-                }
+                } 
+//                 else 
+//                 {
+//                     param_file << std::endl;
+//                 }
             }
+            param_file << std::endl;
         }
                      
                      
-        if( sample_nr % 1000 == 0 ) { std::cout << "Processing sample " << sample_nr << " with real_torque " << elbow_torque_gain*sample.getTorqueMeasure(elbow_torque_global_id) <<  std::endl;
-                                      std::cout << "Static parameters estimated " << estimator_dynamic.getParameterEstimate() << std::endl;
+        if( sample_nr % 1000 == 0 ) { cout << "Processing sample " << sample_nr << " with real_torque " << elbow_torque_gain*sample.getTorqueMeasure(elbow_torque_global_id) <<  std::endl;
+                                      //cout << "Static parameters estimated " << estimator_dynamic.getParameterEstimate() << std::endl;
         }
 
        
@@ -679,8 +787,11 @@ int main(int argc, char ** argv)
         param_file.close();
     }
     
-    std::cout << "iCubParis02_analysis_simple: saved result to " << std::endl;
-    std::cout << "iCubParis02_analysis_simple: got " <<sample_nr << " samples "  << std::endl;
+    cout << "iCubParis02_analysis_simple: saved result to " << results_file_name << std::endl;
+    if( output_param ) {
+        cout << "iCubParis02_analysis_simple: saved parameters to " << params_file_name << std::endl;
+    }
+    cout << "iCubParis02_analysis_simple: got " << sample_nr << " samples."  << std::endl;
     
     return 0;
 }

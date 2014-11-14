@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         std::cout << "additional options: --n_samples n the number of random regressors to generate for the numerical identifable subspace computation" << std::endl;
         std::cout << "additional options: --cut_freq the cut frequency to use for filtering torques and ft measures (in Hz, default 3 Hz)" << std::endl;
         std::cout << "additional options: --sampleTime the sample time of the data (in s, default: 0.01 s)" << std::endl;
-        std::cout << "additional options: --lambda regularization parameter" << std::endl;
+//        std::cout << "additional options: --lambda regularization parameter" << std::endl;
         std::cout << "additional options: --skip number of initial samples to skip" << std::endl;
         std::cout << "additional options: --verbose print debug information" << std::endl;
         std::cout << "additional options: --parameters param.csv output a file of trajectoreis of the estimated parameters" << std::endl;

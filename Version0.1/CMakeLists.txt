@@ -48,81 +48,83 @@ INCLUDE_DIRECTORIES(${orocos_kdl_INCLUDE_DIRS} ${kdl_codyco_INCLUDE_DIRS} ${kdl_
 #${kdl_codyco_INCLUDE_DIRS} ${orocos_kdl_INCLUDE_DIRS} ${Gurls_INCLUDE_DIRS})
 #${kdl_INCLUDE_DIRS})
 # add required linker flags
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")      
-# For Hello Icub tutorial
-ADD_EXECUTABLE(Example Example.cpp)
-# we now add the YARP and iCub libraries to our project.
-TARGET_LINK_LIBRARIES(Example 
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${Gurls_LIBRARIES})
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ICUB_LINK_FLAGS}")  
+
+
+# # For Hello Icub tutorial
+# ADD_EXECUTABLE(Example Example.cpp)
+# # we now add the YARP and iCub libraries to our project.
+# TARGET_LINK_LIBRARIES(Example 
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${Gurls_LIBRARIES})
 
 #${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${Gurls_LIBRARIES})
 #${kdl_INCLUDE_DIRS})
 
-# For Gurls tutorials
-ADD_EXECUTABLE(helloworld helloworld.cpp)
-# we now add the YARP,iCub and other libraries to our project.
-TARGET_LINK_LIBRARIES(helloworld 
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${Gurls_LIBRARIES})
+# # For Gurls tutorials
+# ADD_EXECUTABLE(helloworld helloworld.cpp)
+# # we now add the YARP,iCub and other libraries to our project.
+# TARGET_LINK_LIBRARIES(helloworld 
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${Gurls_LIBRARIES})
 #${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${Gurls_LIBRARIES})
 #${kdl_INCLUDE_DIRS})
 
 
 # Parametric modelling with gurls sample
-ADD_EXECUTABLE(Gurls_PM Gurls_PM.cpp)
-# we now add the YARP,iCub and other libraries to our project.
-TARGET_LINK_LIBRARIES(Gurls_PM 
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${orocos_kdl_LIBRARIES} 
-                        ${kdl_codyco_LIBRARIES} 
-                        ${Gurls_LIBRARIES})
+# ADD_EXECUTABLE(Gurls_PM Gurls_PM.cpp)
+# # we now add the YARP,iCub and other libraries to our project.
+# TARGET_LINK_LIBRARIES(Gurls_PM 
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${orocos_kdl_LIBRARIES} 
+#                         ${kdl_codyco_LIBRARIES} 
+#                         ${Gurls_LIBRARIES})
 
-ADD_EXECUTABLE(Data_Modelling Data_Modelling.cpp)
-# we now add the YARP,iCub and other libraries to our project.
-TARGET_LINK_LIBRARIES(Data_Modelling 
-                        ${YARP_LIBRARIES}
-                        ${iDynTree_LIBRARIES}
-                        ${ICUB_LIBRARIES} 
-                        ${orocos_kdl_LIBRARIES} 
-                        ${kdl_codyco_LIBRARIES} 
-                        ctrlLib 
-                        ${orocos_kdl_LIBRARIES} 
-#                                        kdl_codyco 
-#                                         kdl_format_io 
-                        ${iDynTree_LIBRARIES} 
-                        iDyn 
-                        skinDynLib 
-#                                        iDynTree 
-                        ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
+# ADD_EXECUTABLE(Data_Modelling Data_Modelling.cpp)
+# # we now add the YARP,iCub and other libraries to our project.
+# TARGET_LINK_LIBRARIES(Data_Modelling 
+#                         ${YARP_LIBRARIES}
+#                         ${iDynTree_LIBRARIES}
+#                         ${ICUB_LIBRARIES} 
+#                         ${orocos_kdl_LIBRARIES} 
+#                         ${kdl_codyco_LIBRARIES} 
+#                         ctrlLib 
+#                         ${orocos_kdl_LIBRARIES} 
+# #                                        kdl_codyco 
+# #                                         kdl_format_io 
+#                         ${iDynTree_LIBRARIES} 
+#                         iDyn 
+#                         skinDynLib 
+# #                                        iDynTree 
+#                         ${YARP_LIBRARIES} ${ICUB_LIBRARIES})
 
 # # ${Gurls_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
-ADD_EXECUTABLE(GURLSloocvgaussian GURLSloocvgaussian.cpp)
-# we now add the YARP,iCub and other libraries to our project.
-TARGET_LINK_LIBRARIES(GURLSloocvgaussian
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${orocos_kdl_LIBRARIES} 
-                        ${kdl_codyco_LIBRARIES} 
-                        ctrlLib 
-                        ${orocos_kdl_LIBRARIES} 
-#                         kdl_codyco 
-#                         kdl_format_io 
-                        ${iDynTree_LIBRARIES} 
-                        iDyn 
-                        skinDynLib 
-#                         iDynTree 
-                        ${YARP_LIBRARIES} 
-                        ${ICUB_LIBRARIES}
-                        ${Gurls_LIBRARIES})
+# ADD_EXECUTABLE(GURLSloocvgaussian GURLSloocvgaussian.cpp)
+# # we now add the YARP,iCub and other libraries to our project.
+# TARGET_LINK_LIBRARIES(GURLSloocvgaussian
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${orocos_kdl_LIBRARIES} 
+#                         ${kdl_codyco_LIBRARIES} 
+#                         ctrlLib 
+#                         ${orocos_kdl_LIBRARIES} 
+# #                         kdl_codyco 
+# #                         kdl_format_io 
+#                         ${iDynTree_LIBRARIES} 
+#                         iDyn 
+#                         skinDynLib 
+# #                         iDynTree 
+#                         ${YARP_LIBRARIES} 
+#                         ${ICUB_LIBRARIES}
+#                         ${Gurls_LIBRARIES})
 
 ADD_EXECUTABLE(iCubParis02_simple_analysis 
                 iCubParis02_simple_analysis.cpp 
@@ -147,40 +149,40 @@ TARGET_LINK_LIBRARIES(iCubParis02_simple_analysis
                         ${ICUB_LIBRARIES} 
                         ${Gurls_LIBRARIES})
 
-ADD_EXECUTABLE(test_for_lambda test_for_lambda.cpp)
-TARGET_LINK_LIBRARIES(test_for_lambda 
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${orocos_kdl_LIBRARIES} 
-                        ${kdl_codyco_LIBRARIES} 
-                        ctrlLib 
-                        ${orocos_kdl_LIBRARIES} 
-#                         kdl_codyco 
-#                         kdl_format_io 
-                        ${iDynTree_LIBRARIES} 
-                        iDyn 
-                        skinDynLib 
-#                         iDynTree 
-                        ${YARP_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${Gurls_LIBRARIES})
+# ADD_EXECUTABLE(test_for_lambda test_for_lambda.cpp)
+# TARGET_LINK_LIBRARIES(test_for_lambda 
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${orocos_kdl_LIBRARIES} 
+#                         ${kdl_codyco_LIBRARIES} 
+#                         ctrlLib 
+#                         ${orocos_kdl_LIBRARIES} 
+# #                         kdl_codyco 
+# #                         kdl_format_io 
+#                         ${iDynTree_LIBRARIES} 
+#                         iDyn 
+#                         skinDynLib 
+# #                         iDynTree 
+#                         ${YARP_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${Gurls_LIBRARIES})
 
-ADD_EXECUTABLE(Data_Model_trail Data_Model_trail.cpp)
-# we now add the YARP,iCub and other libraries to our project.
-TARGET_LINK_LIBRARIES(Data_Model_trail 
-                        ${YARP_LIBRARIES} 
-                        ${iDynTree_LIBRARIES} 
-                        ${ICUB_LIBRARIES} 
-                        ${orocos_kdl_LIBRARIES} 
-                        ${kdl_codyco_LIBRARIES} 
-                        ctrlLib 
-                        ${orocos_kdl_LIBRARIES} 
-#                         kdl_codyco 
-#                         kdl_format_io 
-                        ${iDynTree_LIBRARIES} 
-                        iDyn 
-                        skinDynLib 
-#                         iDynTree 
-                        ${YARP_LIBRARIES} 
-                        ${ICUB_LIBRARIES})
+# ADD_EXECUTABLE(Data_Model_trail Data_Model_trail.cpp)
+# # we now add the YARP,iCub and other libraries to our project.
+# TARGET_LINK_LIBRARIES(Data_Model_trail 
+#                         ${YARP_LIBRARIES} 
+#                         ${iDynTree_LIBRARIES} 
+#                         ${ICUB_LIBRARIES} 
+#                         ${orocos_kdl_LIBRARIES} 
+#                         ${kdl_codyco_LIBRARIES} 
+#                         ctrlLib 
+#                         ${orocos_kdl_LIBRARIES} 
+# #                         kdl_codyco 
+# #                         kdl_format_io 
+#                         ${iDynTree_LIBRARIES} 
+#                         iDyn 
+#                         skinDynLib 
+# #                         iDynTree 
+#                         ${YARP_LIBRARIES} 
+#                         ${ICUB_LIBRARIES})
