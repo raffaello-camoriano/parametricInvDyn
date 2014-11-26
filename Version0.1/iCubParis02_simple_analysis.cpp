@@ -294,6 +294,8 @@ int main(int argc, char ** argv)
         lambda = opt.find("lambda").asDouble();
     }
     
+    cout << "Selected lambda: " << lambda << endl;
+    
     int skip;
     if(!opt.check("skip")) 
     {
@@ -552,11 +554,19 @@ int main(int argc, char ** argv)
     
     //Computing the identifiable subspace basis matrix
     Eigen::MatrixXd base_parameters_subspace; 
-    cout<<"rows of base_parameters_subspace :" <<base_parameters_subspace.rows() <<"cols of base_parameters_subspace :" <<base_parameters_subspace.cols() <<std::endl;
-    cout <<n_samples<<std::endl;
-    ret_value = ft_regressor_generator.computeNumericalIdentifiableSubspace(base_parameters_subspace,false,n_samples);
-    cout << ret_value << std::endl;
+    cout << "rows of base_parameters_subspace :" <<base_parameters_subspace.rows() << endl <<"cols of base_parameters_subspace :" <<base_parameters_subspace.cols() <<std::endl;
+    cout << "n_samples: " << n_samples<<std::endl;
+    
+    //ret_value = ft_regressor_generator.computeNumericalIdentifiableSubspace(base_parameters_subspace,false,n_samples);    // WARNING: SEEMS WRONG, outputs NaNs
+    ret_value = ft_regressor_generator.computeNumericalIdentifiableSubspace(base_parameters_subspace);
+    
+    cout << "ret_value: " << ret_value << std::endl;
+    cout << "base_parameters_subspace rows: " << base_parameters_subspace.rows() << endl;
+    cout << "base_parameters_subspace cols: " << base_parameters_subspace.cols() << endl;
     assert( ret_value == 0 );
+    
+    std::cout << "Computed base_parameters_subspace:" <<std::endl << base_parameters_subspace << std::endl;
+    
     
     //Computing the identifiable subspace basis matrix, considering velocity and acceleration to zero
     //Eigen::MatrixXd base_parameters_subspace; 
@@ -570,6 +580,7 @@ int main(int argc, char ** argv)
     
     //Defining the hyperparameter of output standard deviation
     Eigen::VectorXd output_stddev(6);
+    cout << "WARNING: Output standard deviatio hyperparameter is set manually" << endl;
     output_stddev << 0.0707119 ,  0.07460326,  0.11061799,  0.00253377,  0.00295331, 0.00281101;
    
    
@@ -604,7 +615,7 @@ int main(int argc, char ** argv)
     Eigen::VectorXd offset = Eigen::VectorXd(6);
     Eigen::MatrixXd regressor_offset;
     Eigen::VectorXd offset_kt;
-    cout << sample_nr << endl;
+    cout << "Number of samples" << sample_nr << endl;
     
     cout << "size of test_dataset rows:" << test_dataset.getNrOfSamples() <<endl;
     
@@ -674,6 +685,7 @@ int main(int argc, char ** argv)
         el.time = sample.getTimestamp();
         toEigen(velocity_estimator->estimate(el),dq.data);
         toEigen(acceleration_estimator->estimate(el),ddq.data);
+	
         //cout << "velocity data : " << std::endl << dq.data << std::endl;
 	//cout << "accerlation data : " << std::endl << ddq.data << std::endl;
 	//cout << estimator_dynamic.getParamSize() << estimator_dynamic.getParameterEstimate().data() << estimator_dynamic.getParameterEstimate() <<std::endl;        
@@ -723,6 +735,10 @@ int main(int argc, char ** argv)
         Eigen::Matrix<double,6,1> ft_estimated_prediction =  ft_regressor * base_parameters_subspace * estimator_dynamic.getParameterEstimate();
         Eigen::Matrix<double,6,1> ft_cad_prediction =  ft_regressor * cad_parameters;
         //cout << ft_estimated_prediction.data() << std::endl;
+//         cout << "ft_regressor:" <<endl<< ft_regressor << std::endl;
+//         cout << "base_parameters_subspace:" <<endl<< base_parameters_subspace << std::endl;
+//         cout << "estimator_dynamic.getParameterEstimate():" <<endl<< estimator_dynamic.getParameterEstimate() << std::endl;
+//         cout << "ft_estimated_prediction:" <<endl<< ft_estimated_prediction << std::endl;
 	//cout << ft_cad_prediction.data() << std::endl;
 
         //Updating the estimate
@@ -773,12 +789,10 @@ int main(int argc, char ** argv)
             param_file << std::endl;
         }
                      
-                     
         if( sample_nr % 1000 == 0 ) { cout << "Processing sample " << sample_nr << " with real_torque " << elbow_torque_gain*sample.getTorqueMeasure(elbow_torque_global_id) <<  std::endl;
-                                      //cout << "Static parameters estimated " << estimator_dynamic.getParameterEstimate() << std::endl;
+                                      cout << "Estimated static parameters:" <<endl<< estimator_dynamic.getParameterEstimate() << std::endl;
+                                      cout << "ft_estimated_prediction:" <<endl<< ft_estimated_prediction << std::endl;
         }
-
-       
     }
    
     results_file.close();
