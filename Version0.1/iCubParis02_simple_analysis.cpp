@@ -147,7 +147,7 @@ int main(int argc, char ** argv)
    
     if( !opt.check("dataset") ) {
         std::cout << "iCubParis02_data_analysis_simple: " << std::endl;
-        cout << "usage: ./iCubParis02_data_analysis --dataset dataset.csv --results results.csv --xtrain xtr.txt --ytrain ytr.txt " << std::endl;
+        cout << "usage: ./iCubParis02_data_analysis --dataset dataset.csv --results results.csv --verbose --parameters estimatedParameters.csv --results predictions.csv" << std::endl;
         cout << "additional options: --n_samples n the number of random regressors to generate for the numerical identifable subspace computation" << std::endl;
         cout << "additional options: --cut_freq the cut frequency to use for filtering torques and ft measures (in Hz, default 3 Hz)" << std::endl;
         cout << "additional options: --sampleTime the sample time of the data (in s, default: 0.01 s)" << std::endl;
@@ -163,21 +163,21 @@ int main(int argc, char ** argv)
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // get file names from input
-    string xtr_file;
-    if(!opt.check("xtrain")) {
-        cout << "Training samples file not specified. Use --xtrain [FILE_PATH]" << endl;
-        return -1;
-    } else {
-        xtr_file = opt.find("xtrain").asString();
-    }
-
-    string ytr_file;
-    if(!opt.check("ytrain")) {
-        cout << "Training labels file not specified. Use --ytrain [FILE_PATH]" << endl;
-        return -1;
-    } else {
-        ytr_file = opt.find("ytrain").asString();
-    }
+//     string xtr_file;
+//     if(!opt.check("xtrain")) {
+//         cout << "Training samples file not specified. Use --xtrain [FILE_PATH]" << endl;
+//         return -1;
+//     } else {
+//         xtr_file = opt.find("xtrain").asString();
+//     }
+// 
+//     string ytr_file;
+//     if(!opt.check("ytrain")) {
+//         cout << "Training labels file not specified. Use --ytrain [FILE_PATH]" << endl;
+//         return -1;
+//     } else {
+//         ytr_file = opt.find("ytrain").asString();
+//     }
     
     int n_samples;
     if(!opt.check("n_samples")) {
@@ -193,7 +193,6 @@ int main(int argc, char ** argv)
         sampleTime = opt.find("sampleTime").asDouble();
     }
     
-        
     double cut_freq;
     if(!opt.check("cut_freq")) {
         cut_freq = 3;
@@ -718,7 +717,7 @@ int main(int argc, char ** argv)
         }
         
         //Compute offset for CAD parameters
-        //WARNING: This should be a while loop
+        //WARNING: Maybe this should be a while loop
         if( nmbr_of_samples_for_offset_calibration_obtained < nmbr_of_samples_for_offset_calibration ) {
             regressor_offset = ft_regressor.rightCols<6>(); 
             offset_kt = ft_kt - ft_regressor * cad_parameters;
