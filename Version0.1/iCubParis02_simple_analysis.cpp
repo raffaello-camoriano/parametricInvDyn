@@ -204,89 +204,92 @@ int main(int argc, char ** argv)
     double lambda, lambda_semi;
     if(!opt.check("lambda")) 
     {
-        typedef double T;
-        gMat2D<T> Xtr, ytr;	
-	
-	// for silvio dataset
-//      Xtr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/inputs.csv");
-//      ytr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/outputs.csv");
-	
-	// for icub dataset
-	//Xtr.readCSV("../Data_Sets/Xtr_2psmall.txt");
-	//cout << Xtr.rows() <<std::endl;
-	//ytr.readCSV("../Data_Sets/ytr_2psmall.txt");
-
-        // for given dataset
-        Xtr.readCSV(xtr_file);
-        cout << Xtr.rows() << endl;
-        ytr.readCSV(ytr_file);
+        lambda = 1.0; // Default lambda value
         
-	OptTaskSequence *seq = new OptTaskSequence();
-	*seq << "split:ho"<<"paramsel:hoprimal"; // paramsel can be used are fixlambda (always 1), loocvprimal, hoprimal
-        
-        
-	cout << "========================================" << std::endl;
-	cout << "Specified Task Sequence :" << std::endl;
-	cout << *seq << std::endl <<std::endl; 
-        
-        
-	GurlsOptionsList * process = new GurlsOptionsList("processes", false);
-	OptProcess* process1 = new OptProcess();
-	*process1 << GURLS::computeNsave << GURLS::computeNsave;
-	process->addOpt("one", process1);
-	GurlsOptionsList* apt = new GurlsOptionsList("iCubParis02_simple_analysis", true);
-	apt->addOpt("seq", seq);
-	apt->addOpt("processes", process);
-        OptString* hofun = new OptString("rmse");
-        apt->removeOpt("hoperf");
-        apt->addOpt("hoperf", hofun);
-
-	 GURLS G;
-
-        string jobId0("one");
-
-        // run gurls for getting regularization parameter (lambda)
-        G.run(Xtr, ytr, *apt, jobId0);
-        
-	try{
-            gMat2D<T> &lambdas = apt->getOptValue<OptMatrix<gMat2D<T> > >("paramsel.lambdas");
-            
-            cout << "lambda values: \n" << lambdas << std::endl << std::endl;
-            
-            if (lambdas.getSize() > 1)
-            {
-                gVec<T> d = lambdas.asvector();
-                double a[6] = {d[0],d[1],d[2],d[3],d[4],d[5]};
-                
-                // Compute median lambda
-                Median fun;
-                lambda_semi = fun(a, 6); 
-                
-                if(lambda_semi != 1)
-                {
-                    lambda = lambda_semi;
-                    cout <<"======================" <<endl;
-                    cout <<"Selected lambda: " << lambda <<endl;
-                    cout <<"======================" <<endl;
-                }
-            }
-            
-//             else 
-//             { 
-//                 lambda = 1;
-//                 cout <<"final lambda value: " <<lambda<<endl;
-//             }
-       }
-       
-       catch(std::exception &){
-           cout << "Lambda not computed by GURLS" << std::endl << std::endl;
-       }
-       
-       //Debugging mode to see whether lambda value is correct or not....! optional
-       cout << " ================= Printing All ================" <<std::endl << std::endl;
-       apt->printAll();
-       cout << " ================= Printed All ================" <<std::endl << std::endl;
     }
+//         typedef double T;
+//         gMat2D<T> Xtr, ytr;	
+// 	
+// 	// for silvio dataset
+// //      Xtr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/inputs.csv");
+// //      ytr.readCSV("../build/Data_backup/Final_I_can_say/Silvio data/outputs.csv");
+// 	
+// 	// for icub dataset
+// 	//Xtr.readCSV("../Data_Sets/Xtr_2psmall.txt");
+// 	//cout << Xtr.rows() <<std::endl;
+// 	//ytr.readCSV("../Data_Sets/ytr_2psmall.txt");
+// 
+//         // for given dataset
+//         Xtr.readCSV(xtr_file);
+//         cout << Xtr.rows() << endl;
+//         ytr.readCSV(ytr_file);
+//         
+// 	OptTaskSequence *seq = new OptTaskSequence();
+// 	*seq << "split:ho"<<"paramsel:hoprimal"; // paramsel can be used are fixlambda (always 1), loocvprimal, hoprimal
+//         
+//         
+// 	cout << "========================================" << std::endl;
+// 	cout << "Specified Task Sequence :" << std::endl;
+// 	cout << *seq << std::endl <<std::endl; 
+//         
+//         
+// 	GurlsOptionsList * process = new GurlsOptionsList("processes", false);
+// 	OptProcess* process1 = new OptProcess();
+// 	*process1 << GURLS::computeNsave << GURLS::computeNsave;
+// 	process->addOpt("one", process1);
+// 	GurlsOptionsList* apt = new GurlsOptionsList("iCubParis02_simple_analysis", true);
+// 	apt->addOpt("seq", seq);
+// 	apt->addOpt("processes", process);
+//         OptString* hofun = new OptString("rmse");
+//         apt->removeOpt("hoperf");
+//         apt->addOpt("hoperf", hofun);
+// 
+// 	 GURLS G;
+// 
+//         string jobId0("one");
+// 
+//         // run gurls for getting regularization parameter (lambda)
+//         G.run(Xtr, ytr, *apt, jobId0);
+//         
+// 	try{
+//             gMat2D<T> &lambdas = apt->getOptValue<OptMatrix<gMat2D<T> > >("paramsel.lambdas");
+//             
+//             cout << "lambda values: \n" << lambdas << std::endl << std::endl;
+//             
+//             if (lambdas.getSize() > 1)
+//             {
+//                 gVec<T> d = lambdas.asvector();
+//                 double a[6] = {d[0],d[1],d[2],d[3],d[4],d[5]};
+//                 
+//                 // Compute median lambda
+//                 Median fun;
+//                 lambda_semi = fun(a, 6); 
+//                 
+//                 if(lambda_semi != 1)
+//                 {
+//                     lambda = lambda_semi;
+//                     cout <<"======================" <<endl;
+//                     cout <<"Selected lambda: " << lambda <<endl;
+//                     cout <<"======================" <<endl;
+//                 }
+//             }
+//             
+// //             else 
+// //             { 
+// //                 lambda = 1;
+// //                 cout <<"final lambda value: " <<lambda<<endl;
+// //             }
+//        }
+//        
+//        catch(std::exception &){
+//            cout << "Lambda not computed by GURLS" << std::endl << std::endl;
+//        }
+//        
+//        //Debugging mode to see whether lambda value is correct or not....! optional
+//        cout << " ================= Printing All ================" <<std::endl << std::endl;
+//        apt->printAll();
+//        cout << " ================= Printed All ================" <<std::endl << std::endl;
+//     }
     
     else 
     {
@@ -299,7 +302,7 @@ int main(int argc, char ** argv)
     int skip;
     if(!opt.check("skip")) 
     {
-        skip = 1;
+        skip = 0;
     } 
     else 
     {
