@@ -14,17 +14,11 @@ n =  size(f_gnd,1);
 predFileName = 'results/results_4/results.csv';
 pred = load(predFileName);
 
-f_est = -pred(:,1:3);
-t_est = -pred(:,4:6);
+f_est = pred(:,1:3);
+t_est = pred(:,4:6);
 
-f_cad = -pred(:,7:9);
-t_cad = -pred(:,10:12);
-
-% f_est = pred(:,1:3);
-% t_est = pred(:,4:6);
-% 
-% f_cad = pred(:,7:9);
-% t_cad = pred(:,10:12);
+f_cad = pred(:,7:9);
+t_cad = pred(:,10:12);
 
 
 %% Compute averaged RMSEs for cad and estimated parametric predictions at each step
