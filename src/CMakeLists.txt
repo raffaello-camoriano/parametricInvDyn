@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.12.2)
 #set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 #include_directories(/usr/local/include/ /usr/local/)
 
-PROJECT(Parametric_Modelling)
+PROJECT(parametricInvDyn)
 
 
 set(Parametric_Modelling_VERSION_MAJOR "0")
